@@ -1,23 +1,11 @@
 import faiss
-from sentence_transformers import SentenceTransformer, util
+from sentence_transformers import SentenceTransformer
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 from datasets import load_dataset
 import spacy
 import streamlit as st
-import spacy
-import os
 
-
-# Try to load the SpaCy model and download it if necessary
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    print("Downloading the SpaCy model...")
-    os.system("python -m spacy download en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
-
-
-# Load Spacy model for lemmatization and chunking
+# Initialize SpaCy for lemmatization
 nlp = spacy.load("en_core_web_sm")
 
 # Load the lex_glue dataset with the ledgar split
@@ -105,4 +93,3 @@ else:
 
 st.markdown("---")
 st.markdown("Made with ❤️ using Streamlit")
-
