@@ -1,10 +1,11 @@
+streamlit
+transformers
 faiss-cpu
 sentence-transformers
-transformers
-datasets
-streamlit
 spacy
-en-core-web-sm==3.0.0
+datasets
+torch
+
 
 
 
