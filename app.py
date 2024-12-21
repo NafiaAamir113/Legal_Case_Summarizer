@@ -8,10 +8,11 @@ import spacy
 import os
 
 
-# Check if the model is already downloaded, if not download it
+# Try to load the SpaCy model and download it if necessary
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
+    print("Downloading the SpaCy model...")
     os.system("python -m spacy download en_core_web_sm")
     nlp = spacy.load("en_core_web_sm")
 
