@@ -2,8 +2,10 @@ faiss-cpu
 sentence-transformers
 transformers
 datasets
-spacy
 streamlit
+spacy
+en-core-web-sm==3.0.0
+
 
 
 
