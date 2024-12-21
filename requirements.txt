@@ -1,12 +1,8 @@
 streamlit
 transformers
-faiss-cpu
-sentence-transformers
-spacy
-datasets
 torch
-spacy
-en-core-web-sm
+faiss-cpu
+
 
 
 
