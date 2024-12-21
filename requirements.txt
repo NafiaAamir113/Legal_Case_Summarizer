@@ -5,6 +5,8 @@ sentence-transformers
 spacy
 datasets
 torch
+spacy
+en-core-web-sm
 
 
 
