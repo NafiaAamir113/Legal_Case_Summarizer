@@ -7,6 +7,7 @@ import streamlit as st
 import spacy
 import os
 
+
 # Check if the model is already downloaded, if not download it
 try:
     nlp = spacy.load("en_core_web_sm")
