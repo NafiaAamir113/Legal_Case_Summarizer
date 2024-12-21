@@ -4,9 +4,24 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 from datasets import load_dataset
 import spacy
 import streamlit as st
+import subprocess
+import sys
 
-# Initialize SpaCy for lemmatization
+# Install the SpaCy model if not installed
+def install_spacy_model():
+    try:
+        import en_core_web_sm
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
+
+install_spacy_model()
+
+import spacy
 nlp = spacy.load("en_core_web_sm")
+
+
+# # Initialize SpaCy for lemmatization
+# nlp = spacy.load("en_core_web_sm")
 
 # Load the lex_glue dataset with the ledgar split
 @st.cache_data
