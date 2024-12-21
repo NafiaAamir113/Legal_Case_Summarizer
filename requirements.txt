@@ -4,6 +4,6 @@ transformers
 datasets
 spacy
 streamlit
-en-core-web-sm
+
 
 
