@@ -5,7 +5,7 @@ datasets
 streamlit
 spacy
 en-core-web-sm==3.0.0
-python -m spacy download en-core-web-sm
+
 
 
 
