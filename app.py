@@ -4,6 +4,16 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 from datasets import load_dataset
 import spacy
 import streamlit as st
+import spacy
+import os
+
+# Check if the model is already downloaded, if not download it
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    os.system("python -m spacy download en_core_web_sm")
+    nlp = spacy.load("en_core_web_sm")
+
 
 # Load Spacy model for lemmatization and chunking
 nlp = spacy.load("en_core_web_sm")
