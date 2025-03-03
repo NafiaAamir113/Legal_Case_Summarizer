@@ -31,7 +31,6 @@
 #     st.write("### Summary:")
 #     st.write(summary)
 
-
 import streamlit as st
 import torch
 from transformers import RagTokenizer, RagSequenceForGeneration
@@ -42,7 +41,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Load the model and tokenizer with caching
 @st.cache_resource
 def load_model():
-   try:
+    try:
         model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq").to(device)
         tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq")
         return model, tokenizer
@@ -79,7 +78,6 @@ def retrieve_and_summarize(query):
             )
             summary = rag_tokenizer.decode(generated[0], skip_special_tokens=True)
             return summary if summary else "Error: Empty summary generated."
-
     except Exception as e:
         return f"Error during generation: {str(e)}"
 
@@ -99,8 +97,5 @@ if query:
             st.subheader("Summary:")
             st.write(summary)
 
-        else:
-            st.subheader("Summary:")
-            st.write(summary)
 
 
