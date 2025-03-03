@@ -42,7 +42,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 # Load the model and tokenizer with caching
 @st.cache_resource
 def load_model():
-    try:
+   try:
         model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq").to(device)
         tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq")
         return model, tokenizer
