@@ -31,53 +31,49 @@
 #     st.write("### Summary:")
 #     st.write(summary)
 
+
 import streamlit as st
 import torch
-from transformers import RagTokenizer, RagSequenceForGeneration
+from transformers import BartForConditionalGeneration, BartTokenizer
 
-# Set device (use GPU if available)
+# Set device (GPU if available)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Load the model and tokenizer with caching
+# Load model and tokenizer
 @st.cache_resource
 def load_model():
     try:
-        model = RagSequenceForGeneration.from_pretrained("facebook/rag-sequence-nq").to(device)
-        tokenizer = RagTokenizer.from_pretrained("facebook/rag-sequence-nq")
+        model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn").to(device)
+        tokenizer = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
         return model, tokenizer
     except Exception as e:
         st.error(f"Error loading model: {e}")
         return None, None
 
-rag_model, rag_tokenizer = load_model()
+model, tokenizer = load_model()
 
-# Function to retrieve and summarize legal cases
-def retrieve_and_summarize(query):
-    if not query.strip():
+# Function to generate summaries
+def summarize_text(text):
+    if not text.strip():
         return "Error: Query cannot be empty."
 
-    if rag_model is None or rag_tokenizer is None:
+    if model is None or tokenizer is None:
         return "Error: Model or tokenizer failed to load."
 
     try:
-        # Tokenize query
-        inputs = rag_tokenizer(query, return_tensors="pt")
-
-        # Debugging: Check tokenized inputs
-        if not inputs or "input_ids" not in inputs or inputs["input_ids"] is None:
-            return "Error: Tokenization failed. Check your input or model."
-
+        inputs = tokenizer(text, return_tensors="pt", max_length=1024, truncation=True)
         inputs = {key: value.to(device) for key, value in inputs.items()}  # Move to device
 
-        # Generate summary
         with torch.no_grad():
-            generated = rag_model.generate(
-                input_ids=inputs["input_ids"], 
-                num_return_sequences=1, 
-                max_length=200  # Prevent overly short responses
+            summary_ids = model.generate(
+                input_ids=inputs["input_ids"],
+                max_length=250,
+                num_return_sequences=1,
+                length_penalty=2.0,
+                early_stopping=True
             )
-            summary = rag_tokenizer.decode(generated[0], skip_special_tokens=True)
-            return summary if summary else "Error: Empty summary generated."
+        summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+        return summary if summary else "Error: Empty summary generated."
     except Exception as e:
         return f"Error during generation: {str(e)}"
 
@@ -85,12 +81,12 @@ def retrieve_and_summarize(query):
 st.title("Legal Case Summarizer")
 st.write("Enter a legal query below to retrieve and summarize relevant legal cases.")
 
-query = st.text_input("Enter Legal Query:")
+query = st.text_area("Enter Legal Query:")
 
 if query:
     st.write(f"**Generating summary for:** {query}")
     with st.spinner("Processing..."):
-        summary = retrieve_and_summarize(query)
+        summary = summarize_text(query)
         if "Error" in summary:
             st.error(summary)
         else:
