@@ -31,14 +31,15 @@
 #     st.write("### Summary:")
 #     st.write(summary)
 
+
 import streamlit as st
 import torch
 from transformers import RagTokenizer, RagSequenceForGeneration
 
-# Set device (GPU if available)
+# Set device (use GPU if available)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Load the model and tokenizer safely
+# Load the model and tokenizer with caching
 @st.cache_resource
 def load_model():
     try:
@@ -51,7 +52,7 @@ def load_model():
 
 rag_model, rag_tokenizer = load_model()
 
-# Function to generate summaries
+# Function to retrieve and summarize legal cases
 def retrieve_and_summarize(query):
     if not query.strip():
         return "Error: Query cannot be empty."
@@ -60,17 +61,22 @@ def retrieve_and_summarize(query):
         return "Error: Model or tokenizer failed to load."
 
     try:
-        # Tokenize the query
+        # Tokenize query
         inputs = rag_tokenizer(query, return_tensors="pt")
 
-        if "input_ids" not in inputs or inputs["input_ids"] is None:
-            return "Error: Tokenization failed."
+        # Debugging: Check tokenized inputs
+        if not inputs or "input_ids" not in inputs or inputs["input_ids"] is None:
+            return "Error: Tokenization failed. Check your input or model."
 
-        inputs = {key: value.to(device) for key, value in inputs.items()}  # Move inputs to device
+        inputs = {key: value.to(device) for key, value in inputs.items()}  # Move to device
 
-        # Generate response
+        # Generate summary
         with torch.no_grad():
-            generated = rag_model.generate(input_ids=inputs["input_ids"], num_return_sequences=1)
+            generated = rag_model.generate(
+                input_ids=inputs["input_ids"], 
+                num_return_sequences=1, 
+                max_length=200  # Prevent overly short responses
+            )
             summary = rag_tokenizer.decode(generated[0], skip_special_tokens=True)
             return summary if summary else "Error: Empty summary generated."
 
@@ -89,6 +95,10 @@ if query:
         summary = retrieve_and_summarize(query)
         if "Error" in summary:
             st.error(summary)
+        else:
+            st.subheader("Summary:")
+            st.write(summary)
+
         else:
             st.subheader("Summary:")
             st.write(summary)
