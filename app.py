@@ -32,7 +32,9 @@
 #     st.write(summary)
 
 
-import streamlit as st
+
+
+     import streamlit as st
 import torch
 from transformers import RagTokenizer, RagSequenceForGeneration
 
@@ -50,9 +52,18 @@ rag_model, rag_tokenizer = load_model()
 
 # Function to generate summaries
 def retrieve_and_summarize(query):
-    inputs = rag_tokenizer(query, return_tensors="pt").to(device)
+    if not query.strip():
+        return "Invalid input: Query cannot be empty."
 
-    # Generate response without calling retriever() separately
+    # Tokenize query safely
+    inputs = rag_tokenizer(query, return_tensors="pt")
+    
+    if "input_ids" not in inputs or inputs["input_ids"] is None:
+        return "Error: Tokenization failed."
+
+    inputs = inputs.to(device)
+
+    # Generate response
     with torch.no_grad():
         generated = rag_model.generate(input_ids=inputs["input_ids"], num_return_sequences=1)
 
@@ -74,4 +85,6 @@ if query:
             st.write(summary)
         except Exception as e:
             st.error("An error occurred while generating the summary.")
+            st.text(str(e))
+
             st.text(str(e))
