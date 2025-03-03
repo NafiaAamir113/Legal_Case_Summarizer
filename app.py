@@ -31,8 +31,6 @@
 #     st.write("### Summary:")
 #     st.write(summary)
 
-
-
 import streamlit as st
 import torch
 from transformers import RagTokenizer, RagSequenceForGeneration
@@ -40,7 +38,7 @@ from transformers import RagTokenizer, RagSequenceForGeneration
 # Set device (GPU if available)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Load the model and tokenizer with caching
+# Load the model and tokenizer safely
 @st.cache_resource
 def load_model():
     try:
@@ -56,27 +54,28 @@ rag_model, rag_tokenizer = load_model()
 # Function to generate summaries
 def retrieve_and_summarize(query):
     if not query.strip():
-        return "Invalid input: Query cannot be empty."
+        return "Error: Query cannot be empty."
 
-    if not rag_model or not rag_tokenizer:
+    if rag_model is None or rag_tokenizer is None:
         return "Error: Model or tokenizer failed to load."
 
-    # Tokenize query safely
-    inputs = rag_tokenizer(query, return_tensors="pt")
+    try:
+        # Tokenize the query
+        inputs = rag_tokenizer(query, return_tensors="pt")
 
-    if not inputs or "input_ids" not in inputs or inputs["input_ids"] is None:
-        return "Error: Tokenization failed."
+        if "input_ids" not in inputs or inputs["input_ids"] is None:
+            return "Error: Tokenization failed."
 
-    inputs = inputs.to(device)
+        inputs = {key: value.to(device) for key, value in inputs.items()}  # Move inputs to device
 
-    # Generate response
-    with torch.no_grad():
-        try:
+        # Generate response
+        with torch.no_grad():
             generated = rag_model.generate(input_ids=inputs["input_ids"], num_return_sequences=1)
             summary = rag_tokenizer.decode(generated[0], skip_special_tokens=True)
-            return summary
-        except Exception as e:
-            return f"Error during generation: {e}"
+            return summary if summary else "Error: Empty summary generated."
+
+    except Exception as e:
+        return f"Error during generation: {str(e)}"
 
 # Streamlit UI
 st.title("Legal Case Summarizer")
@@ -93,4 +92,5 @@ if query:
         else:
             st.subheader("Summary:")
             st.write(summary)
+
 
